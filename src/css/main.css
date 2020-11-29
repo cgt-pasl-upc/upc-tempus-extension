@@ -1,0 +1,19 @@
+#cgt-tempus-info {
+    background-color: #eee;
+    margin: 1em;
+}
+
+.cgt-info-sign {
+    color: blue;
+}
+
+.cgt-text-alert {
+    color: red;
+    font-weight: bold;
+}
+
+.tooltip-inner {
+    max-width: 350px;
+    width: 350px; 
+    text-align: left;
+}

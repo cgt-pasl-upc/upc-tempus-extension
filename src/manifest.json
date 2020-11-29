@@ -1,0 +1,38 @@
+{
+  "description": "Extensió pel Firefox de l'aplicació Tempus de la UPC",
+  "manifest_version": 2,
+  "name": "Extensió UPC Tempus",
+  "version": "0.0.1",
+  "homepage_url": "https://gitlab.com/oriol.teixido/upc-tempus-extension",
+  "icons": {
+    "48": "icons/icon-48.png"
+  },
+  "permissions": [
+    "https://tempus.upc.edu/"
+  ],
+  "content_security_policy": "script-src 'self'; object-src 'self'",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://tempus.upc.edu/RLG/saldoMensual/list"
+      ],
+      "js": [
+        "loader.js"
+      ]
+    }
+  ],
+  "web_accessible_resources": [
+    "main.js",
+    "models/Temps.js",
+    "models/Permis.js",
+    "models/TipusPermis.js",
+    "models/exceptions/ScrapperException.js",
+    "models/exceptions/HttpRequestException.js",
+    "models/exceptions/PermisNotFoundException.js",
+    "services/PermisManager.js",
+    "services/Scrapper.js",
+    "css/main.css",
+    "html/info.html",
+    "js/mustache.min.js"
+  ]
+}
