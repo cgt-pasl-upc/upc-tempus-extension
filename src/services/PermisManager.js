@@ -8,25 +8,25 @@ export default class PermisManager {
         if (typeof PermisManager.tipusPermisos === 'undefined' ) {
             PermisManager.tipusPermisos = [
                 // Permisos per hores recuperables
-                new TipusPermis('7041', 'Permís recuperable').perHores().recuperable(),
-                new TipusPermis('7033', 'Acompanyament fills i/o familiars al metge').perHores().recuperable(),
-                new TipusPermis('7037', 'Reunions tutoria fills/es').perHores().recuperable(),
+                new TipusPermis('Permís recuperable').perHores().recuperable(),
+                new TipusPermis('Acompanyament fills i/o familiars al metge').perHores().recuperable(),
+                new TipusPermis('Reunions tutoria fills/es').perHores().recuperable(),
 
                 // TODO: Pendent de classificar
-                new TipusPermis('7030', 'Candidatura campanya electoral del Règim Electoral General').perHores().noRecuperable(),
-                new TipusPermis('7014', 'Concurs o examen oficial').perHores().noRecuperable(),
-                new TipusPermis('7083', 'Curs Desenvolupament Professional 50%').perHores().noRecuperable(),
-                new TipusPermis('7027', 'Exàmens prenatal i tècniques de preparació al part').perHores().noRecuperable(),
-                new TipusPermis('7088', 'Hores extr. compens. autoritzades 2020 fins març 2021').perHores().noRecuperable(),
-                new TipusPermis('7045', 'Indisposició parcial').perHores().noRecuperable(),
-                new TipusPermis('7010', 'Naixement d\'un fill/a, adopció o acolliment permanent o preadoptiu d\'un o una menor').perHores().noRecuperable(),
-                new TipusPermis('7039', 'Participació en concursos/oposicions convocades per la UPC').perHores().noRecuperable(),
-                new TipusPermis('7036', 'Rehabilitació malaltia professional').perHores().noRecuperable(),
-                new TipusPermis('7035', 'Revisió mèdica laboral').perHores().noRecuperable(),
-                new TipusPermis('7032', 'Tasques article 83 LOU').perHores().noRecuperable(),
-                new TipusPermis('7052', 'Tràmits administratius i/o idoneïtat adopció o acolliment permanent o preadoptiu').perHores().noRecuperable(),
-                new TipusPermis('7004', 'Visita de treball').perHores().noRecuperable(),
-                new TipusPermis('7016', 'Visita metge').perHores().noRecuperable()
+                new TipusPermis('Candidatura campanya electoral del Règim Electoral General').perHores().noRecuperable(),
+                new TipusPermis('Concurs o examen oficial').perHores().noRecuperable(),
+                new TipusPermis('Curs Desenvolupament Professional 50%').perHores().noRecuperable(),
+                new TipusPermis('Exàmens prenatal i tècniques de preparació al part').perHores().noRecuperable(),
+                new TipusPermis('Hores extr. compens. autoritzades 2020 fins març 2021').perHores().noRecuperable(),
+                new TipusPermis('Indisposició parcial').perHores().noRecuperable(),
+                new TipusPermis('Naixement d\'un fill/a, adopció o acolliment permanent o preadoptiu d\'un o una menor').perHores().noRecuperable(),
+                new TipusPermis('Participació en concursos/oposicions convocades per la UPC').perHores().noRecuperable(),
+                new TipusPermis('Rehabilitació malaltia professional').perHores().noRecuperable(),
+                new TipusPermis('Revisió mèdica laboral').perHores().noRecuperable(),
+                new TipusPermis('Tasques article 83 LOU').perHores().noRecuperable(),
+                new TipusPermis('Tràmits administratius i/o idoneïtat adopció o acolliment permanent o preadoptiu').perHores().noRecuperable(),
+                new TipusPermis('Visita de treball').perHores().noRecuperable(),
+                new TipusPermis('Visita metge').perHores().noRecuperable()
             ];
         }
         return PermisManager.tipusPermisos;
@@ -63,7 +63,7 @@ export default class PermisManager {
             return (elem.nom == nom);
         });
         if (permis == undefined) {
-            permis = new TipusPermis('undefined', nom).noRecuperable();
+            permis = new TipusPermis(nom).noRecuperable();
             this.addTipusPermisos(permis);
         }
         return permis;
@@ -71,7 +71,7 @@ export default class PermisManager {
 
     static sumatoriPerTipus(tipus, permisos) {
         return permisos.reduce(function (acumulador, actual, index, valors) {
-            if (tipus.findIndex(elem => elem.codi === actual.tipus.codi) !== -1) {
+            if (tipus.findIndex(elem => elem.nom === actual.tipus.nom) !== -1) {
                 return acumulador.suma(actual.temps);
             }
             else {

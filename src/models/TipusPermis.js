@@ -1,6 +1,5 @@
 export default class TipusPermis {
-    constructor(codi, nom) {
-        this.codi = codi;
+    constructor(nom) {
         this.nom = nom;
         this.recuperar = false;
         this.dies = false;
@@ -43,6 +42,6 @@ export default class TipusPermis {
     }
 
     toString() {
-        return `[codi=${this.codi},nom=${this.nom},recuperable=${this.recuperar},dies=${this.dies}]`;
+        return `[nom=${this.nom},recuperable=${this.recuperar},dies=${this.dies}]`;
     }
 }
