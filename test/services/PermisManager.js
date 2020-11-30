@@ -6,14 +6,17 @@ import PermisManager from '../../src/services/PermisManager.js';
 import PermisNotFoundException from '../../src/models/exceptions/PermisNotFoundException.js';
 
 describe('PermisManager', function() {
+  
   describe('getTipusPermisRecuperables()', function() {
     it.skip('obtenir permisos recuberables', function() {
     });
   });
+
   describe('getTipusPermisNoRecuperables()', function() {
     it.skip('obtenir permisos no recuberables', function() {
     });
   });
+
   describe('sumatoriPerTipus()', function() {
     it('sumatori d\'array buit', function() {
       var tipus = new TipusPermis('00', 'Permis 0', true);
@@ -55,42 +58,55 @@ describe('PermisManager', function() {
   });
 
   describe('createPermisDiesPerNom()', function() {
-    it('permís "Assumptes propis 2020"', function() {
-      var permis = PermisManager.createPermisDiesPerNom('01/01/2020', 'Assumptes propis 2020');
+    it('permís existent', function() {
+      var tipus = new TipusPermis('0001', 'Permís 0001').perDies().recuperable();
+      PermisManager.tipusPermisos = [ tipus ];
+
+      var permis = PermisManager.createPermisDiesPerNom('01/01/2020', 'Permís 0001');
       assert.deepStrictEqual(permis.data, '01/01/2020');
       assert.deepStrictEqual(permis.temps, new Temps(7, 30));
-      assert.deepStrictEqual(permis.tipus, new TipusPermis('7073', 'Assumptes propis 2020').perDies().noRecuperable());
+      assert.deepStrictEqual(permis.tipus, new TipusPermis('0001', 'Permís 0001').perDies().recuperable());
     });
     it('permís no existent', function() {
-      assert.throws(function () { 
-        PermisManager.createPermisDiesPerNom('01/01/2020', 'Permís no existent') 
-      }, PermisNotFoundException,  /No s\'ha trobat el permís "Permís no existent"./);
+      PermisManager.tipusPermisos = [];
+      var permis = PermisManager.createPermisDiesPerNom('01/02/2020', 'Permís 0002');
+      assert.deepStrictEqual(permis.data, '01/02/2020');
+      assert.deepStrictEqual(permis.temps, new Temps(7, 30));
+      assert.deepStrictEqual(permis.tipus, new TipusPermis('undefined', 'Permís 0002').perDies().noRecuperable());
     });
   });
 
   describe('createPermisHoresPerNom()', function() {
-    it('permís "Assistència a assemblea"', function() {
-      var permis = PermisManager.createPermisHoresPerNom('31/12/2020', new Temps(3,45), 'Assistència a assemblea');
-      assert.deepStrictEqual(permis.data, '31/12/2020');
-      assert.deepStrictEqual(permis.temps, new Temps(3, 45));
-      assert.deepStrictEqual(permis.tipus, new TipusPermis('7046', 'Assistència a assemblea').perHores().noRecuperable());
+    it('permís existent', function() {
+      var tipus = new TipusPermis('0001', 'Permís 0001').perHores().recuperable();
+      PermisManager.tipusPermisos = [ tipus ];
+
+      var permis = PermisManager.createPermisHoresPerNom('01/01/2020', new Temps(3, 30), 'Permís 0001');
+      assert.deepStrictEqual(permis.data, '01/01/2020');
+      assert.deepStrictEqual(permis.temps, new Temps(3, 30));
+      assert.deepStrictEqual(permis.tipus, new TipusPermis('0001', 'Permís 0001').perHores().recuperable());
     });
     it('permís no existent', function() {
-      assert.throws(function () { 
-        PermisManager.createPermisHoresPerNom('31/12/2020', new Temps(6,0), 'Permís no existent') 
-      }, PermisNotFoundException,  /No s\'ha trobat el permís "Permís no existent"./);
+      PermisManager.tipusPermisos = [];
+      var permis = PermisManager.createPermisHoresPerNom('01/02/2020', new Temps(2, 15), 'Permís 0002');
+      assert.deepStrictEqual(permis.data, '01/02/2020');
+      assert.deepStrictEqual(permis.temps, new Temps(2, 15));
+      assert.deepStrictEqual(permis.tipus, new TipusPermis('undefined', 'Permís 0002').perHores().noRecuperable());
     });
   });
 
   describe('getTipusPermisPerNom()', function() {
-    it('permís "Assistència a assemblea"', function() {
-      var tipus = PermisManager.getTipusPermisPerNom('Assistència a assemblea');
-      assert.deepStrictEqual(tipus, new TipusPermis('7046', 'Assistència a assemblea').perHores().noRecuperable());
+    it('permisos existents', function() {
+      var tipus1 = new TipusPermis('0001', 'Permís 0001').perDies().recuperable();
+      var tipus2 = new TipusPermis('0002', 'Permís 0002').perHores().noRecuperable();
+      PermisManager.tipusPermisos = [ tipus1, tipus2 ];
+      assert.deepStrictEqual(PermisManager.getTipusPermisPerNom('Permís 0001'), tipus1);
+      assert.deepStrictEqual(PermisManager.getTipusPermisPerNom('Permís 0002'), tipus2);
     });
-    it('permís no existent', function() {
-      assert.throws(function () { 
-        PermisManager.getTipusPermisPerNom('Permís no existent') 
-      }, PermisNotFoundException,  /No s\'ha trobat el permís "Permís no existent"./);
+    it('permisos per defecte', function() {
+      var tipus = new TipusPermis('undefined', 'Permís 0001').perHores().noRecuperable();
+      PermisManager.tipusPermisos = [];
+      assert.deepStrictEqual(PermisManager.getTipusPermisPerNom('Permís 0001'), tipus);
     });
   });
 });
