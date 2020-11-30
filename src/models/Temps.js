@@ -51,7 +51,6 @@ export default class Temps {
         }
 
         return `${signe}${new Intl.NumberFormat('ca-ES').format(hores)} ${nomHores} i ${String(minuts)} ${nomMinuts}`;        
-        // return `${signe}${new Intl.NumberFormat('ca-ES').format(hores)}:${String(minuts).padStart(2, '0')}`;
     }
 
     toString() {
