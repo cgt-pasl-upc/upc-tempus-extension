@@ -15,30 +15,19 @@ export default class Scrapper {
         return deferred;
     }
 
-    static getSaldo(any) {
-        var callback = function(responseText) {
-            return {
-                "H. teo.": Scrapper.getTempsFromLocator("#tableList tr:last td:nth-child(2)"),
-                "H. treb.": Scrapper.getTempsFromLocator("#tableList tr:last td:nth-child(3)"),
-                "H.p.n.r.": Scrapper.getTempsFromLocator("#tableList tr:last td:nth-child(4)"),
-                "H.p.r.": Scrapper.getTempsFromLocator("#tableList tr:last td:nth-child(5)"),
-                "S.m.": Scrapper.getTempsFromLocator("#tableList tr:last td:nth-child(6)")
-            };
+    static getSaldo() {
+        return {
+            "H. teo.": Scrapper.getTempsFromLocator("#tableList tr:last td:nth-child(2)"),
+            "H. treb.": Scrapper.getTempsFromLocator("#tableList tr:last td:nth-child(3)"),
+            "H.p.n.r.": Scrapper.getTempsFromLocator("#tableList tr:last td:nth-child(4)"),
+            "H.p.r.": Scrapper.getTempsFromLocator("#tableList tr:last td:nth-child(5)"),
+            "S.m.": Scrapper.getTempsFromLocator("#tableList tr:last td:nth-child(6)")
         };
-        return Scrapper.post("https://tempus.upc.edu/RLG/saldoMensual/list", { "any": any }, callback);
-    }
-
-    static getTempsFromLocator(selector) {
-        var value = $(selector).text();
-        if (!value) {
-            throw new ScrapperException(`Hores en posició "${selector}" no trobades.`);
-        }
-        return new Temps(parseInt(value.split(':')[0]), parseInt(value.split(':')[1]));
     }
    
     static getPermisosPerDies(inici,final) {
         var callback = function(responseText) {
-            var permisos = Array();
+            var permisos = [];
             $(responseText).find("#tableList > tbody > tr:not(.comentari)").each(function(index) {
                 var data1 = $(this).find("td:nth-child(1)").text().trim(/[\s,]+/);
                 var data2 = $(this).find("td:nth-child(2)").text().trim(/[\s,]+/);
@@ -64,11 +53,11 @@ export default class Scrapper {
     
     static getPermisosPerHores(inici, final) {
         var callback = function(responseText) {
-            var permisos = Array();
+            var permisos = [];
             $(responseText).find("#tableList > tbody > tr:not(.comentari)").each(function(index) {
-                var data = $(this).find("td:nth-child(1)").text().split(/[\t\n]+/)[1]; // TODO: Hauria de ser 0
-                var temps = $(this).find("td:nth-child(1)").text().split(/[\t\n]+/)[2]; // TODO: Hauria de ser 1
-                var tipus = $(this).find("td:nth-child(3)").text().trim();
+                var data = $(this).find("td:nth-child(1)").text().split(/[\t\n]+/)[1].trim(/[\s,]+/); // TODO: Hauria de ser 0
+                var temps = $(this).find("td:nth-child(1)").text().split(/[\t\n]+/)[2].trim(/[\s,]+/); // TODO: Hauria de ser 1
+                var tipus = $(this).find("td:nth-child(3)").text().trim(/[\s,]+/);
                 if (data || temps || tipus) {
                     if (!data)
                         throw new ScrapperException("Data del permís per hores no trobada.");
@@ -78,7 +67,7 @@ export default class Scrapper {
                         throw new ScrapperException("Tipus del permís per hores no trobat.");
                     }
 
-                    var permis = PermisManager.createPermisHoresPerNom(data, new Temps(temps.split(':')[0], temps.split(':')[1]), tipus);
+                    var permis = PermisManager.createPermisHoresPerNom(data, Temps.fromString(temps), tipus);
                     permisos.push(permis);
                 }
             });
@@ -86,71 +75,40 @@ export default class Scrapper {
         };
         return Scrapper.getPaginacio(`https://tempus.upc.edu/RLG/permisHores/list?dataInici=${inici}&dataFi=${final}&_action_list=Cerca`, callback);
     }
-    
+ 
+    static getTempsFromLocator(selector) {
+        var value = $(selector).text().trim(/[\s,]+/);
+        if (!value) {
+            throw new ScrapperException(`Hores en posició "${selector}" no trobades.`);
+        }
+        return Temps.fromString(value);
+    }
+
     static getPaginacio(url, callback, offset = 0, max = PAGINACIO_MAX) {
         var deferred = $.Deferred();
-        var req = new XMLHttpRequest();
-        req.open('GET', url + `&max=${max}&offset=${offset}`, true);
-        req.onreadystatechange = function (ev) {
-            if (req.readyState == 4) {
-                if(req.status == 200) {
-                    var elems = callback(req.responseText);
-                    if (elems.length > 0) {
-                        $.when(Scrapper.getPaginacio(url, callback, offset + max)).done(function (moreElems) {
-                            deferred.resolve(elems.concat(moreElems));
-                        });
-                    }
-                    else {
-                        deferred.resolve(elems);
-                    }
-                }
-                else {
-                    throw new HttpRequestException(req);
-                }
+        $.get(url + `&max=${max}&offset=${offset}`).done(function(data) {
+            var elems = callback(data);
+            if (elems.length > 0) {
+                Scrapper.getPaginacio(url, callback, offset + max).done(function (moreElems) {
+                    deferred.resolve(elems.concat(moreElems));
+                });
             }
-        };
-        req.send(null);
+            else {
+                deferred.resolve(elems);
+            }
+        }).fail(function() {
+            throw new HttpRequestException(this);
+        });
         return deferred;
     }
 
     static get(url, callback) {
         var deferred = $.Deferred();
-        var req = new XMLHttpRequest();
-        req.open('GET', url, true);
-        req.onreadystatechange = function (ev) {
-            if (req.readyState == 4) {
-                if(req.status == 200) {
-                    deferred.resolve(callback(req.responseText));
-                }
-                else {
-                    throw new HttpRequestException(req);
-                }
-            }
-        };
-        req.send(null);    
-        return deferred;
-    }
-
-    static post(url, parameters, callback) {
-        var deferred = $.Deferred();
-        var req = new XMLHttpRequest();
-        var data = new FormData();
-        Object.keys(parameters).forEach(function(key) {
-            data.append(key, parameters[key]);
+        $.get(url).done(function(data) {
+            deferred.resolve(callback(data));
+        }).fail(function() {
+            throw new HttpRequestException(this);
         });
-
-        req.open('POST', url, true);
-        req.onreadystatechange = function (ev) {
-            if (req.readyState == 4) {
-                if(req.status == 200) {
-                    deferred.resolve(callback(req.responseText));
-                }
-                else {
-                    throw new HttpRequestException(req);
-                }
-            }
-        };
-        req.send(data);
         return deferred;
     }
 }

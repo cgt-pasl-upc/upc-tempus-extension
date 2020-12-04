@@ -1,7 +1,24 @@
+import TempsInvalidFormatException from "./exceptions/TempsInvalidFormatException.js";
+
 export default class Temps {
     constructor(hores = 0, minuts = 0) {
         this.minuts = parseInt(hores) * 60 + parseInt(minuts);
         return this;
+    }
+
+    static fromString(s) {
+        var hores = parseInt(s.split(':')[0]);
+        var minuts = parseInt(s.split(':')[1]);
+        if (isNaN(hores) || isNaN(minuts)) {
+            throw new TempsInvalidFormatException(s);
+        }
+        if (minuts < 0) {
+            throw new TempsInvalidFormatException(s);
+        }
+        if (hores < 0) {
+            minuts = -minuts;
+        }
+        return new Temps(hores, minuts);
     }
 
     clone() {
@@ -31,7 +48,7 @@ export default class Temps {
         return this;
     }
 
-    format() {
+    format(mode) {
         var hores = 0;
         var minuts = 0;
         var signe = this.minuts < 0 ? "-" : "";
@@ -50,7 +67,18 @@ export default class Temps {
             return `${signe}${new Intl.NumberFormat('ca-ES').format(hores)} ${nomHores}`;
         }
 
-        return `${signe}${new Intl.NumberFormat('ca-ES').format(hores)} ${nomHores} i ${String(minuts)} ${nomMinuts}`;        
+        return `${signe}${new Intl.NumberFormat('ca-ES').format(hores)} ${nomHores} i ${String(minuts)} ${nomMinuts}`;
+    }
+
+    formatCurt(mode) {
+        var hores = 0;
+        var minuts = 0;
+        var signe = this.minuts < 0 ? "-" : "";
+
+        hores = Math.floor(Math.abs(this.minuts) / 60);
+        minuts = Math.abs(this.minuts) % 60;
+
+        return `${signe}${new Intl.NumberFormat('ca-ES').format(hores)}:${String(minuts).padStart(2,'0')}`;
     }
 
     toString() {

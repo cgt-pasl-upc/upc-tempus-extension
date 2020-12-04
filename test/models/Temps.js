@@ -1,5 +1,6 @@
 import assert from 'assert';
 import { kMaxLength } from 'buffer';
+import TempsInvalidFormatException from '../../src/models/exceptions/TempsInvalidFormatException.js';
 import Temps from '../../src/models/Temps.js';
 
 describe('Temps', function() {
@@ -21,6 +22,39 @@ describe('Temps', function() {
       assert.strictEqual(t.minuts, 5*60-95);
     });
   });
+
+  describe('fromString()', function() {
+    it('string buit', function() {
+      assert.throws(function () { 
+        Temps.fromString(""); 
+      }, TempsInvalidFormatException,  /El format del temps és incorrecte ""./);
+    });  
+    it('string sense separador', function() {
+      assert.throws(function () { 
+        Temps.fromString("4"); 
+      }, TempsInvalidFormatException,  /El format del temps és incorrecte "4"./);
+    });  
+    it('string amb caràcters invàlids', function() {
+      assert.throws(function () { 
+        Temps.fromString("xx:43"); 
+      }, TempsInvalidFormatException,  /El format del temps és incorrecte "xx:43"./);
+    });  
+    it('minuts negatius', function() {
+      assert.throws(function () { 
+        Temps.fromString("5:-31");
+      }, TempsInvalidFormatException,  /El format del temps és incorrecte "5:-31"./);
+    });  
+    it('valors normalitzats', function() {
+      assert.strictEqual(Temps.fromString("7:30").minuts, 7*60+30);
+    });
+    it('valors no normalitzats', function() {
+      assert.strictEqual(Temps.fromString("6:95").minuts, 6*60+95);
+    });
+    it('valors negatius', function() {
+      assert.strictEqual(Temps.fromString("-7:30").minuts, -(7*60+30));
+    });
+  });
+
   describe('clone()', function() {
     it('còpia', function() {
       var t1 = new Temps(4,15);
@@ -106,8 +140,6 @@ describe('Temps', function() {
       var t = new Temps(5,34);
       assert.strictEqual(t.format(), '5 hores i 34 minuts');
     });
-  });
-  describe('format()', function() {
     it('representació sense hores', function() {
       var t = new Temps(0,2);
       assert.strictEqual(t.format(), '2 minuts');
@@ -129,6 +161,34 @@ describe('Temps', function() {
       assert.strictEqual(t.format(), '-25 hores i 30 minuts');
     });
   });  
+
+  describe('formatCurt()', function() {
+    it('representació', function() {
+      var t = new Temps(5,34);
+      assert.strictEqual(t.formatCurt(), '5:34');
+    });
+    it('representació sense hores', function() {
+      var t = new Temps(0,2);
+      assert.strictEqual(t.formatCurt(), '0:02');
+    });
+    it('representació 1 hora i 1 minut', function() {
+      var t = new Temps(1,1);
+      assert.strictEqual(t.formatCurt(), '1:01');
+    });
+    it('representació sense minuts', function() {
+      var t = new Temps(5,0);
+      assert.strictEqual(t.formatCurt(), '5:00');
+    });
+    it('representació amb separador de milers', function() {
+      var t = new Temps(3401,20);
+      assert.strictEqual(t.formatCurt(), '3.401:20');
+    });
+    it('representació amb números negatius', function() {
+      var t = new Temps(-25,-30);
+      assert.strictEqual(t.formatCurt(), '-25:30');
+    });
+  });  
+
   describe('toString()', function() {
     it('representació String() ', function() {
       var t = new Temps(2,50);
