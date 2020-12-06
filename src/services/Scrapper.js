@@ -29,21 +29,21 @@ export default class Scrapper {
         var callback = function(responseText) {
             var permisos = [];
             $(responseText).find("#tableList > tbody > tr:not(.comentari)").each(function(index) {
-                var data1 = $(this).find("td:nth-child(1)").text().trim(/[\s,]+/);
-                var data2 = $(this).find("td:nth-child(2)").text().trim(/[\s,]+/);
-                var tipus = $(this).find("td:nth-child(4)").text().trim(/[\s,]+/);
-                if (data1 || data2 || tipus) {
-                    if (!data1)
+                var data = Scrapper.getTrimValue($(this).find("td:nth-child(1)").text());
+                var tipus = Scrapper.getTrimValue($(this).find("td:nth-child(4)").text());
+                var estat = Scrapper.getTrimValue($(this).find("td:nth-child(5)").text());
+                if (data || tipus || estat) {
+                    if (!data)
                         throw new ScrapperException("Data del permís per dies no trobada.");
-                    if (!data2)
-                        throw new ScrapperException("Data del permís per dies no trobada.");
-                    if (data1 != data2)
-                        throw new ScrapperException(`Dates de permís diferents (${data1}<>${data2}).`);
                     if (!tipus)
                         throw new ScrapperException("Tipus del permís per dies no trobat.");
-    
-                    var permis = PermisManager.createPermisDiesPerNom(data1, tipus);
-                    permisos.push(permis);
+                    if (!estat)
+                        throw new ScrapperException("Estat del permís per hores no trobat.");
+
+                    if (estat == "Acceptat") {
+                        var permis = PermisManager.createPermisDiesPerNom(data, tipus);
+                        permisos.push(permis);
+                    }                            
                 }
             });
             return permisos;
@@ -54,34 +54,51 @@ export default class Scrapper {
     static getPermisosPerHores(inici, final) {
         var callback = function(responseText) {
             var permisos = [];
-            $(responseText).find("#tableList > tbody > tr:not(.comentari)").each(function(index) {
-                var data = $(this).find("td:nth-child(1)").text().split(/[\t\n]+/)[1].trim(/[\s,]+/); // TODO: Hauria de ser 0
-                var temps = $(this).find("td:nth-child(1)").text().split(/[\t\n]+/)[2].trim(/[\s,]+/); // TODO: Hauria de ser 1
-                var tipus = $(this).find("td:nth-child(3)").text().trim(/[\s,]+/);
+
+            $(responseText).find("#tableList > tbody > tr:not(.comentari,.denegacio)").each(function(index) {
+                var data = Scrapper.getTrimSplitValue($(this).find("td:nth-child(1)").text(), 0);
+                var temps = Scrapper.getTrimSplitValue($(this).find("td:nth-child(1)").text(), 1);
+                var tipus = Scrapper.getTrimValue($(this).find("td:nth-child(3)").text());
+                var estat = Scrapper.getTrimValue($(this).find("td:nth-child(4)").text());
                 if (data || temps || tipus) {
                     if (!data)
                         throw new ScrapperException("Data del permís per hores no trobada.");
                     if (!temps)
                         throw new ScrapperException("Durada del permís per hores no trobada.");
-                    if (!tipus) {
+                    if (!tipus)
                         throw new ScrapperException("Tipus del permís per hores no trobat.");
-                    }
+                    if (!estat)
+                        throw new ScrapperException("Estat del permís per hores no trobat.");
 
-                    var permis = PermisManager.createPermisHoresPerNom(data, Temps.fromString(temps), tipus);
-                    permisos.push(permis);
+                    if (estat == "Acceptat") {
+                        var permis = PermisManager.createPermisHoresPerNom(data, Temps.fromString(temps), tipus);
+                        permisos.push(permis);
+                    }
                 }
             });
             return permisos;
         };
         return Scrapper.getPaginacio(`https://tempus.upc.edu/RLG/permisHores/list?dataInici=${inici}&dataFi=${final}&_action_list=Cerca`, callback);
     }
- 
+    
+    static getTrimSplitValue(data, index) {
+        var value = Scrapper.getTrimValue(data).split(/[\s]+/)[index];
+        if (value) {
+            value = Scrapper.getTrimValue(value);
+        }
+        return value;
+    }
+
     static getTempsFromLocator(selector) {
-        var value = $(selector).text().trim(/[\s,]+/);
+        var value = Scrapper.getTrimValue($(selector).text());
         if (!value) {
             throw new ScrapperException(`Hores en posició "${selector}" no trobades.`);
         }
         return Temps.fromString(value);
+    }
+
+    static getTrimValue(value) {
+        return value.trim(/[\s\t\r\n]+/);
     }
 
     static getPaginacio(url, callback, offset = 0, max = PAGINACIO_MAX) {

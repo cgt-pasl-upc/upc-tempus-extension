@@ -73,19 +73,18 @@ describe("Scrapper", function() {
     });
 
     it("sense permisos", async function() {
-      await Scrapper.getPermisosPerDies("01/01/2020","02/02/2020").then(function(permisos) {
+      await Scrapper.getPermisosPerDies("01/01/2020","31/12/2020").then(function(permisos) {
         assert.deepStrictEqual([], permisos);
       });
     });
-    it("test 01", async function() {
-      var data1 = stubGetSetUrl("permisDies/list?filtreAnyGaudiment=Tots&dataInici=01/01/2020&dataFi=02/02/2020&max=30&offset=0", "permisDies.test01.00-29");
-      var data2 = stubGetSetUrl("permisDies/list?filtreAnyGaudiment=Tots&dataInici=01/01/2020&dataFi=02/02/2020&max=30&offset=30", "permisDies.test01.30-59");
+    it("test 01 (paginació)", async function() {
+      var data1 = stubGetSetUrl("permisDies/list?filtreAnyGaudiment=Tots&dataInici=01/01/2020&dataFi=31/12/2020&max=30&offset=0", "permisDies.test01.00-29");
+      var data2 = stubGetSetUrl("permisDies/list?filtreAnyGaudiment=Tots&dataInici=01/01/2020&dataFi=31/12/2020&max=30&offset=30", "permisDies.test01.30-59");
 
-      await Scrapper.getPermisosPerDies("01/01/2020","02/02/2020").then(function(permisos) {
+      await Scrapper.getPermisosPerDies("01/01/2020","31/12/2020").then(function(permisos) {
         assert.deepStrictEqual(permisos, [].concat(data1, data2));
       });
     });
-
   });
 
   describe("getPermisosPerHores()", function() {
@@ -94,19 +93,32 @@ describe("Scrapper", function() {
     });
 
     it("sense permisos", async function() {
-      await Scrapper.getPermisosPerHores("01/01/2020","02/02/2020").then(function(permisos) {
+      await Scrapper.getPermisosPerHores("01/01/2020","31/12/2020").then(function(permisos) {
         assert.deepStrictEqual(permisos, []);
       });
     });
-    it("test 01", async function() {
-      var data1 = stubGetSetUrl("permisHores/list?dataInici=01/01/2020&dataFi=02/02/2020&_action_list=Cerca&max=30&offset=0", "permisHores.test01.00-29");
-      var data2 = stubGetSetUrl("permisHores/list?dataInici=01/01/2020&dataFi=02/02/2020&_action_list=Cerca&max=30&offset=30", "permisHores.test01.30-59");
+    it("test 01 (paginació)", async function() {
+      var data1 = stubGetSetUrl("permisHores/list?dataInici=01/01/2020&dataFi=31/12/2020&_action_list=Cerca&max=30&offset=0", "permisHores.test01.00-29");
+      var data2 = stubGetSetUrl("permisHores/list?dataInici=01/01/2020&dataFi=31/12/2020&_action_list=Cerca&max=30&offset=30", "permisHores.test01.30-59");
       
-      await Scrapper.getPermisosPerHores("01/01/2020","02/02/2020").then(function(permisos) {
+      await Scrapper.getPermisosPerHores("01/01/2020","31/12/2020").then(function(permisos) {
         assert.deepStrictEqual(permisos, [].concat(data1, data2));
       });
     });
+    it("test 02 (denegats)", async function() {
+      var data1 = stubGetSetUrl("permisHores/list?dataInici=01/01/2020&dataFi=31/12/2020&_action_list=Cerca&max=30&offset=0", "permisHores.test02.00-29");
 
+      await Scrapper.getPermisosPerHores("01/01/2020","31/12/2020").then(function(permisos) {
+        assert.deepStrictEqual(permisos, data1);
+      });
+    });
+    it("test 03 (pendents)", async function() {
+      var data1 = stubGetSetUrl("permisHores/list?dataInici=01/01/2020&dataFi=31/12/2020&_action_list=Cerca&max=30&offset=0", "permisHores.test03.00-29");
+
+      await Scrapper.getPermisosPerHores("01/01/2020","31/12/2020").then(function(permisos) {
+        assert.deepStrictEqual(permisos, data1);
+      });
+    });
   });
 
   describe("getPermisos()", function() {
@@ -115,17 +127,17 @@ describe("Scrapper", function() {
     });
 
     it("sense permisos", async function() {
-      await Scrapper.getPermisos("01/01/2020","02/02/2020").then(function(permisos) {
+      await Scrapper.getPermisos("01/01/2020","31/12/2020").then(function(permisos) {
         assert.deepStrictEqual(permisos, []);
       });
     });
     it("test 01", async function() {
-      var data1 = stubGetSetUrl("permisDies/list?filtreAnyGaudiment=Tots&dataInici=01/01/2020&dataFi=02/02/2020&max=30&offset=0", "permisDies.test01.00-29");
-      var data2 = stubGetSetUrl("permisDies/list?filtreAnyGaudiment=Tots&dataInici=01/01/2020&dataFi=02/02/2020&max=30&offset=30", "permisDies.test01.30-59");
-      var data3 = stubGetSetUrl("permisHores/list?dataInici=01/01/2020&dataFi=02/02/2020&_action_list=Cerca&max=30&offset=0", "permisHores.test01.00-29");
-      var data4 = stubGetSetUrl("permisHores/list?dataInici=01/01/2020&dataFi=02/02/2020&_action_list=Cerca&max=30&offset=30", "permisHores.test01.30-59");
+      var data1 = stubGetSetUrl("permisDies/list?filtreAnyGaudiment=Tots&dataInici=01/01/2020&dataFi=31/12/2020&max=30&offset=0", "permisDies.test01.00-29");
+      var data2 = stubGetSetUrl("permisDies/list?filtreAnyGaudiment=Tots&dataInici=01/01/2020&dataFi=31/12/2020&max=30&offset=30", "permisDies.test01.30-59");
+      var data3 = stubGetSetUrl("permisHores/list?dataInici=01/01/2020&dataFi=31/12/2020&_action_list=Cerca&max=30&offset=0", "permisHores.test01.00-29");
+      var data4 = stubGetSetUrl("permisHores/list?dataInici=01/01/2020&dataFi=31/12/2020&_action_list=Cerca&max=30&offset=30", "permisHores.test01.30-59");
 
-      await Scrapper.getPermisos("01/01/2020","02/02/2020").then(function(permisos) {
+      await Scrapper.getPermisos("01/01/2020","31/12/2020").then(function(permisos) {
         assert.deepStrictEqual(permisos, [].concat(data1, data2, data3, data4));
       });
     });
