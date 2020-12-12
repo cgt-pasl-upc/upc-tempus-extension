@@ -1,7 +1,7 @@
 import assert from 'assert';
-import Temps from '../../src/models/Temps.js';
-import TipusPermis from '../../src/models/TipusPermis.js';
-import Permis from '../../src/models/Permis.js';
+import Temps from '../../../src/models/Temps.js';
+import TipusPermis from '../../../src/models/TipusPermis.js';
+import Permis from '../../../src/models/Permis.js';
 
 describe('Permis', function() {
   describe('contructor()', function() {

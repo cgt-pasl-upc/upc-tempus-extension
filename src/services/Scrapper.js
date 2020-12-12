@@ -10,7 +10,14 @@ export default class Scrapper {
     static getPermisos(inici, final) {
         var deferred = $.Deferred();
         $.when(this.getPermisosPerDies(inici, final), this.getPermisosPerHores(inici, final)).done(function (v1, v2) {
-            deferred.resolve(v1.concat(v2));
+            try {
+                deferred.resolve(v1.concat(v2));
+            }
+            catch(e) {
+                deferred.reject(e);
+            }
+        }).fail(function(e) {
+            deferred.reject(e);
         });
         return deferred;
     }
@@ -28,17 +35,13 @@ export default class Scrapper {
     static getPermisosPerDies(inici,final) {
         var callback = function(responseText) {
             var permisos = [];
-            $(responseText).find("#tableList > tbody > tr:not(.comentari)").each(function(index) {
+            $(responseText).find("#tableList > tbody > tr:not(.comentari,.denegacio)").each(function(index) {
                 var data = Scrapper.getTrimValue($(this).find("td:nth-child(1)").text());
                 var tipus = Scrapper.getTrimValue($(this).find("td:nth-child(4)").text());
                 var estat = Scrapper.getTrimValue($(this).find("td:nth-child(5)").text());
                 if (data || tipus || estat) {
-                    if (!data)
-                        throw new ScrapperException("Data del permís per dies no trobada.");
-                    if (!tipus)
-                        throw new ScrapperException("Tipus del permís per dies no trobat.");
-                    if (!estat)
-                        throw new ScrapperException("Estat del permís per hores no trobat.");
+                    if (!data || !tipus || !estat)
+                        throw new ScrapperException($(this));
 
                     if (estat == "Acceptat") {
                         var permis = PermisManager.createPermisDiesPerNom(data, tipus);
@@ -60,15 +63,9 @@ export default class Scrapper {
                 var temps = Scrapper.getTrimSplitValue($(this).find("td:nth-child(1)").text(), 1);
                 var tipus = Scrapper.getTrimValue($(this).find("td:nth-child(3)").text());
                 var estat = Scrapper.getTrimValue($(this).find("td:nth-child(4)").text());
-                if (data || temps || tipus) {
-                    if (!data)
-                        throw new ScrapperException("Data del permís per hores no trobada.");
-                    if (!temps)
-                        throw new ScrapperException("Durada del permís per hores no trobada.");
-                    if (!tipus)
-                        throw new ScrapperException("Tipus del permís per hores no trobat.");
-                    if (!estat)
-                        throw new ScrapperException("Estat del permís per hores no trobat.");
+                if (data || temps || tipus || estat) {
+                    if (!data || !temps || !tipus || !estat)
+                        throw new ScrapperException($(this));
 
                     if (estat == "Acceptat") {
                         var permis = PermisManager.createPermisHoresPerNom(data, Temps.fromString(temps), tipus);
@@ -92,7 +89,7 @@ export default class Scrapper {
     static getTempsFromLocator(selector) {
         var value = Scrapper.getTrimValue($(selector).text());
         if (!value) {
-            throw new ScrapperException(`Hores en posició "${selector}" no trobades.`);
+            throw new ScrapperException($(selector), selector);
         }
         return Temps.fromString(value);
     }
@@ -104,28 +101,40 @@ export default class Scrapper {
     static getPaginacio(url, callback, offset = 0, max = PAGINACIO_MAX) {
         var deferred = $.Deferred();
         $.get(url + `&max=${max}&offset=${offset}`).done(function(data) {
-            var elems = callback(data);
-            if (elems.length > 0) {
-                Scrapper.getPaginacio(url, callback, offset + max).done(function (moreElems) {
-                    deferred.resolve(elems.concat(moreElems));
-                });
+            try {
+                var elems = callback(data);
+                if (elems.length > 0) {
+                    Scrapper.getPaginacio(url, callback, offset + max).done(function (moreElems) {
+                        deferred.resolve(elems.concat(moreElems));
+                    }).fail(function(e) {
+                        deferred.reject(e);
+                    });
+                }
+                else {
+                    deferred.resolve(elems);
+                }
             }
-            else {
-                deferred.resolve(elems);
+            catch(e) {
+                deferred.reject(e);
             }
         }).fail(function() {
-            throw new HttpRequestException(this);
+            deferred.reject(new HttpRequestException(this));
         });
-        return deferred;
+        return deferred.promise();
     }
 
     static get(url, callback) {
         var deferred = $.Deferred();
         $.get(url).done(function(data) {
-            deferred.resolve(callback(data));
+            try {
+                deferred.resolve(callback(data));
+            }
+            catch(e) {
+                deferred.reject(e);
+            }
         }).fail(function() {
-            throw new HttpRequestException(this);
+            deferred.reject(HttpRequestException(this));
         });
-        return deferred;
+        return deferred.promise();
     }
 }

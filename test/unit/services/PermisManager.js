@@ -1,8 +1,8 @@
 import assert from 'assert';
-import Temps from '../../src/models/Temps.js';
-import Permis from '../../src/models/Permis.js';
-import TipusPermis from '../../src/models/TipusPermis.js';
-import PermisManager from '../../src/services/PermisManager.js';
+import Temps from '../../../src/models/Temps.js';
+import Permis from '../../../src/models/Permis.js';
+import TipusPermis from '../../../src/models/TipusPermis.js';
+import PermisManager from '../../../src/services/PermisManager.js';
 
 describe('PermisManager', function() {
 

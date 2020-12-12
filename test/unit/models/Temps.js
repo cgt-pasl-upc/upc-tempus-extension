@@ -1,7 +1,7 @@
 import assert from 'assert';
 import { kMaxLength } from 'buffer';
-import TempsInvalidFormatException from '../../src/models/exceptions/TempsInvalidFormatException.js';
-import Temps from '../../src/models/Temps.js';
+import TempsInvalidFormatException from '../../../src/models/exceptions/TempsInvalidFormatException.js';
+import Temps from '../../../src/models/Temps.js';
 
 describe('Temps', function() {
   describe('contructor()', function() {

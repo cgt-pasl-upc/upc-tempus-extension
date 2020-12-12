@@ -3,9 +3,9 @@ import sinon from "sinon";
 import jQuery from "jquery";
 import { JSDOM } from "jsdom";
 import fs from "fs";
-import Temps from "../../src/models/Temps.js";
-import Scrapper from "../../src/services/Scrapper.js";
-import PermisManager from "../../src/services/PermisManager.js";
+import Temps from "../../../src/models/Temps.js";
+import Scrapper from "../../../src/services/Scrapper.js";
+import PermisManager from "../../../src/services/PermisManager.js";
 
 describe("Scrapper", function() {
 

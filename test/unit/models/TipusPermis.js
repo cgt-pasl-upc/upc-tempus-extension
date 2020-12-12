@@ -1,5 +1,5 @@
 import assert from 'assert';
-import TipusPermis from '../../src/models/TipusPermis.js';
+import TipusPermis from '../../../src/models/TipusPermis.js';
 
 describe('TipusPermis', function() {
   describe('contructor()', function() {

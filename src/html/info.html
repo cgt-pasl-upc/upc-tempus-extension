@@ -1,18 +1,28 @@
-<div id="cgt-tempus-info" class="alert alert-success" role="alert">
+<div id="cgt-info" class="alert alert-success cgt-box" role="alert">
+  <span class="pull-right glyphicon glyphicon-remove cgt-clickable"></span>
 
-<p>
-  Has realitzat {{HoresRealitzades}} <sup><span class="glyphicon glyphicon-info-sign cgt-info-sign" aria-hidden="true" data-toggle="tooltip" data-placement="right" data-html="true" title="+ Treballades <em>({{HoresTreballades}})</em><br/> + Permisos no recuperables <em>({{HoresNoRecuperables}})</em><br/> - Vacances <em>({{HoresVacances}})</em><br/> - Assumpte Propis <em>({{HoresAp}})</em>"></span></sup>.
-  Segons els VI Conveni el PAS-L hauries de realitzar {{HoresConveni}} hores anuals. 
-</p>  
-  
-{{#SaldoPossitiu}}
   <p>
-    <strong>Atenció!</strong> Has supertat el còmput anual en <span class="cgt-text-alert">{{HoresDiferencia}}</span>.
-  </p>
-{{/SaldoPossitiu}}
+    Has realitzat {{HoresRealitzades}} <sup><span class="glyphicon glyphicon-info-sign" aria-hidden="true" data-toggle="tooltip" data-placement="right" data-html="true" title="+ Treballades <em>({{HoresTreballades}})</em><br/> + Permisos no recuperables <em>({{HoresNoRecuperables}})</em><br/> - Vacances <em>({{HoresVacances}})</em><br/> - Assumpte Propis <em>({{HoresAp}})</em>"></span></sup>.
+    Segons els VI Conveni el PAS-L hauries de realitzar {{HoresConveni}} hores anuals. 
+  </p>  
+    
+  {{#SaldoPossitiu}}
+    <p>
+      <strong>Atenció!</strong> Has supertat el còmput anual en <span class="cgt-alert">{{HoresDiferencia}}</span>.
+    </p>
+  {{/SaldoPossitiu}}
 
-{{^SaldoPossitiu}}
-<p>
-  Et resten per realitzar <strong>{{HoresDiferencia}}</strong> fins a final d'any.
-</p>
-{{/SaldoPossitiu}}
+  {{^SaldoPossitiu}}
+  <p>
+    Et resten per realitzar <strong>{{HoresDiferencia}}</strong> fins a final d'any.
+  </p>
+  {{/SaldoPossitiu}}
+
+</div>
+
+<script>
+  $("#cgt-info [data-toggle='tooltip']").tooltip();
+  $('.cgt-box .cgt-clickable').on('click',function() {
+    $(this).closest('.alert').fadeOut();
+  })
+</script>

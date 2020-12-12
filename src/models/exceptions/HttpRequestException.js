@@ -1,6 +1,6 @@
 export default class HttpRequestException extends Error {
     constructor(request) {
-        super();
-        this.message = `La resposta HTTP és "${request.statusText}".`;
+        super("La resposta HTTP és incorrecta");
+        this.data = request.statusText;
     }
 }

@@ -1,6 +1,6 @@
 export default class TempsInvalidFormatException extends Error {
-    constructor(s) {
-        super();
-        this.message = `El format del temps és incorrecte "${s}".`;
+    constructor(data) {
+        super("El format del temps és incorrecte");
+        this.data = data;
     }
 }

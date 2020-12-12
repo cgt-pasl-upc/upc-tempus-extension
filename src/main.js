@@ -1,3 +1,4 @@
+import Config from "./Config.js";
 import Temps from "./models/Temps.js";
 import Scrapper from "./services/Scrapper.js";
 import PermisManager from "./services/PermisManager.js";
@@ -8,19 +9,14 @@ console.log("CGT-Tempus loaded.");
 document.addEventListener('cgt-loader-event', function (e)
 {
     console.log("CGT-Tempus loader event received");
-    main(e.detail);
+    var loader = e.detail;
+    try {
+      main(loader);
+    }
+    catch (error) {
+      showError(loader, error);
+    }
 });
-
-function loadStatusDialog(loader, values = {}) 
-{
-  $.get(loader.getURL('html/info.html')).done(function(data) {
-    var $data = $(Mustache.render(data, values));
-    $data.find("[data-toggle='tooltip']").tooltip();
-    $("body").prepend($data);
-  }).fail(function(jqXHR) {
-    throw new HttpRequestException(jqXHR);
-  });
-}
 
 function main(loader) {
   var any = $("form select option[selected=\"selected\"").val();
@@ -34,7 +30,7 @@ function main(loader) {
   var final = `${dia}/${mes}/${any}`;
 
   $.when(Scrapper.getSaldo(any), Scrapper.getPermisos(inici,final)).done(function(saldo, permisos) {
-    var horesConveni = new Temps(1462); // TODO: percentageJornada <> 100% !!!!!!!!!!!!
+    var horesConveni = new Temps(1462); // TODO: percentageJornada <> 100%
 
     var horesTreballades = saldo["H. treb."];
     var horesVacances = PermisManager.sumatoriPerTipus([PermisManager.getTipusPermisPerNom('Vacances')], permisos);
@@ -57,6 +53,29 @@ function main(loader) {
       "HoresDiferencia": horesDiferencia.format(),
       "SaldoPossitiu": saldoPositiu
     };
-    loadStatusDialog(loader, values);
+    loadHtml(loader, "html/info.html", "body", values);
+  }).fail(function(error) { 
+    showError(loader, error);
+  });
+}
+
+function showError(loader, error) 
+{
+  var values = {
+    "error": error,
+    "version": Config.getVersion(),
+    "email": Config.getContactEmail()
+  };
+  console.log(error);
+  loadHtml(loader, 'html/error.html', "body", values);
+}
+
+function loadHtml(loader, url, selector, values = {}) 
+{
+  $.get(loader.getURL(url)).done(function(data) {
+    var $data = $(Mustache.render(data, values));
+    $(selector).prepend($data);
+  }).fail(function(jqXHR) {
+    throw new HttpRequestException(jqXHR);
   });
 }

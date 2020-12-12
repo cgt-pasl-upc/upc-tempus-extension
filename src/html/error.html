@@ -1,0 +1,42 @@
+<div id="cgt-error" class="alert alert-danger cgt-box" role="alert">
+  <span class="pull-right glyphicon glyphicon-remove cgt-clickable"></span>
+  <p><strong>S'ha produït un error a l'aplicació</strong> [<em>{{error.message}}</em>]</p>
+  <p>      
+    Per tal de sol·lucionar aquest problema ens caldria que ens fessis arribar la informació següent al correu <em><strong>{{email}}</strong></em>. 
+    Tingues en compte que <span style="text-decoration: underline;">hi pot apàreixer informació personal</span>, per tant, ets lliure de modificar el contingut i ocultar la inforamció que consideris. 
+  </p>
+
+  <a data-toggle="collapse" data-target="#cgt-error-trace" href="javascript:void(0);" aria-expanded="false" role="button">
+    Mostrar la informació <span class="glyphicon glyphicon-collapse-down"></span>
+  </a>
+
+  <div id="cgt-error-trace" class="collapse">
+    <textarea class="cgt-trace">
+Versió de l'extensió v{{version}}
+----------------------------------------------------------------------------------------------------
+{{error.stack}}
+{{#error.data}}
+----------------------------------------------------------------------------------------------------
+{{error.data}}
+{{/error.data}}
+    </textarea>
+    <div class="cgt-trace-info"></div>
+    <button type="button" class="pull-right btn btn-primary btn-sm" onclick="cgtCopyToClipboard()">
+      <span class="glyphicon glyphicon-copy"></span> Copia al portaretalls
+    </button>
+    <div class="clearfix"></div>
+  </div>
+</div>
+
+<script>
+function cgtCopyToClipboard() {
+  $("#cgt-error textarea").select();
+  document.execCommand("copy");
+  document.activeElement.selectionEnd = document.activeElement.selectionStart;
+  $("#cgt-error .cgt-trace-info").html("Text copiat.");
+}
+
+$(".cgt-box .cgt-clickable").on("click",function() {
+    $(this).closest(".alert").fadeOut();
+})
+</script>
